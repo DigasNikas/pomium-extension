@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Pomium",
+  "version": "0.1.0",
+  "description": "Bombs the page with a Pomeranian at every click.",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/pom-bomb.js", "src/content.js"],
+      "css": ["src/pom-bomb.css"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ]
+}

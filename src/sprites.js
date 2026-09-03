@@ -37,12 +37,24 @@ export class SpriteList {
   constructor(limit = MAX_ACTIVE) {
     this.limit = limit;
     this.items = [];
+    this.nextSeq = 0;
   }
 
   add(sprite) {
+    // Insertion order is tracked explicitly via a monotonic sequence number,
+    // not inferred from array position: engine.update() sorts this.items by
+    // zIndex in place every tick (draw order), so by the time add() runs
+    // again the array is no longer in insertion order. Evicting by splice(0,
+    // n) against that sorted array evicted whatever a shockwave's zIndex
+    // (scale - 10) put first, not the oldest sprite.
+    sprite.seq = this.nextSeq;
+    this.nextSeq += 1;
     this.items.push(sprite);
     if (this.items.length > this.limit) {
-      this.items.splice(0, this.items.length - this.limit);
+      const excess = this.items.length - this.limit;
+      const oldest = [...this.items].sort((a, b) => a.seq - b.seq).slice(0, excess);
+      const evict = new Set(oldest);
+      this.items = this.items.filter((s) => !evict.has(s));
     }
   }
 
@@ -50,9 +62,5 @@ export class SpriteList {
     this.items = this.items.filter(
       (s) => !s.retired && !isCulled(s, width, height)
     );
-  }
-
-  clear() {
-    this.items = [];
   }
 }

@@ -43,7 +43,7 @@ for tier in desktop mobile; do
   done <<< "$names"
 done
 
-actual=$(find "$ROOT/assets/desktop" "$ROOT/assets/mobile" -type f | wc -l | tr -d ' ')
+actual=$(find "$ROOT/assets/desktop" "$ROOT/assets/mobile" -type f \( -name '*.json' -o -name '*.webp' \) | wc -l | tr -d ' ')
 if [ "$actual" -ne "$total_expected" ]; then
   echo "ERROR: expected $total_expected files (from manifest) but found $actual" >&2
   exit 1

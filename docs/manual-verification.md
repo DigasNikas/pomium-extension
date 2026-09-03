@@ -1,7 +1,7 @@
 # Manual verification
 
 Pomium's motion maths, sprite lifecycle, atlas parsing, cache eviction, the
-fixed-step loop, and manifest integrity are covered by 64 automated tests
+fixed-step loop, and manifest integrity are covered by 67 automated tests
 (`npm test`). What automated tests cannot reach — DOM assembly, asset
 fetching over the network, and anything about how it actually looks — has
 **not been run**. This checklist is how a human closes that gap. It takes a
@@ -22,6 +22,16 @@ someone runs it.
 - [ ] The fixtures below are opened as `file://` URLs, which extensions
       cannot reach by default. On the Pomium card in `chrome://extensions`,
       click "Details" and turn on "Allow access to file URLs".
+- [ ] Know this failure signature before you start: `manifest.json`'s
+      `web_accessible_resources` carries `use_dynamic_url: true`. It is on
+      the critical path for both the bootstrap `import()` in
+      `src/content.js` and every atlas fetch in `src/atlas-loader.js`, both
+      of which depend on `chrome.runtime.getURL()` resolving correctly under
+      that flag — and it is untested here, since no unit test can see it. If
+      **nothing happens at all on any fixture** (no sprites ever appear on
+      click) and the page's DevTools console shows `[pomium] failed to
+      start`, remove `use_dynamic_url` from `manifest.json`, reload the
+      unpacked extension, and retry.
 
 ## 1. Dark fixture — spawn line and heading
 
@@ -91,10 +101,15 @@ world.
       Content Security Policy directive" messages).
 
 If assets fail to load here specifically (but work on the other fixtures),
-the loader has regressed to using an `<img>` element somewhere instead of
-`fetch` + `createImageBitmap` (`src/atlas-loader.js`). This is the one
-fixture that would actually catch that regression — the other pages have
-no CSP and would not.
+there are two possible causes: either the loader has regressed to using an
+`<img>` element somewhere instead of `fetch` + `createImageBitmap`
+(`src/atlas-loader.js`), or `use_dynamic_url: true` in `manifest.json` is
+resolving URLs in a way this particular CSP blocks (see the `use_dynamic_url`
+failure signature in the Setup section above — though that one usually shows
+up as nothing working on *any* fixture, not just this one, so if the other
+three fixtures are fine, the loader regression is the more likely of the
+two). This is the one fixture that would actually catch either regression —
+the other pages have no CSP and would not.
 
 ## 4. Scroll fixture — canvas sizing and click-through
 

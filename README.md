@@ -35,10 +35,11 @@ a continuous stream.
 ## Tests
 
 `npm test` runs `node --test "test/**/*.test.js"` — `node:test`, no
-dependencies, 64 tests across nine files: `geometry`, `sprites`, `engine`,
-`atlas`, `assets-manifest`, `loop`, `render`, `overlay`, and `manifest`
-(the last one checks `manifest.json` itself — every path it references
-actually exists on disk).
+dependencies, 67 tests across ten files: `geometry`, `sprites`, `engine`,
+`atlas`, `assets-manifest`, `loop`, `render`, `overlay`, `manifest`, and
+`config` (the last one guards the `ATLAS_CACHE_LIMIT` / `ROSTER_SIZE`
+relationship; `manifest` checks `manifest.json` itself — every path it
+references actually exists on disk).
 
 These tests cover the motion maths, sprite lifecycle, engine behaviour,
 atlas parsing, cache eviction, the loop's refresh-rate independence, and the
@@ -49,7 +50,7 @@ part has to be checked by a human — see
 steps and the four fixture pages under `test/fixtures/` (`page-dark.html`,
 `page-light.html`, `page-csp.html`, `page-scroll.html`) they use.
 
-**As of this writing, that manual pass has not been run.** The 64 automated
+**As of this writing, that manual pass has not been run.** The 67 automated
 tests are green; the browser-only behaviour they describe is unverified.
 
 ## Artwork

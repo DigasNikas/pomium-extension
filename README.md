@@ -5,6 +5,8 @@ on any web page. Click anywhere and a pair of Pomeranians sweeps across the
 viewport behind a fire shockwave, with a short camera shake. Hold and drag for
 a continuous stream.
 
+![Pomium running on GitHub and Hacker News](docs/demo.gif)
+
 ## Install (unpacked)
 
 1. Open `chrome://extensions`

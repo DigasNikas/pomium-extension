@@ -1,0 +1,10 @@
+{
+  "name": "pomium-extension",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Chrome extension that bombs any page with Pomeranians on click.",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\""
+  }
+}

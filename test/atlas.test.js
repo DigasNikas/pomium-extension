@@ -65,6 +65,27 @@ test('clear closes every held bitmap', async () => {
   assert.deepEqual(closed.sort(), ['a', 'b']);
 });
 
+test('clear during an in-flight load closes the bitmap instead of resurrecting it in the cache', async () => {
+  // Regression for finding 6: clear() used to only empty the maps. An
+  // outstanding load(key) still resolves after that and its .then ran
+  // entries.set(key, atlas) on the cache the caller already dropped, leaking
+  // a never-closed ImageBitmap into a Map nobody references any more.
+  const closed = [];
+  let resolveLoad;
+  const load = () => new Promise((resolve) => {
+    resolveLoad = () => resolve({ image: { close: () => closed.push('a') }, frames: [] });
+  });
+  const cache = createAtlasCache({ limit: 2, load });
+
+  const pending = cache.get('a');
+  cache.clear();
+  resolveLoad();
+  await pending;
+
+  assert.deepEqual(closed, ['a']);
+  assert.equal(cache.peek('a'), undefined);
+});
+
 test('a rejected load does not poison the key: the next get retries', async () => {
   let calls = 0;
   const load = async (key) => {

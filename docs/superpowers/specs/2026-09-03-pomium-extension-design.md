@@ -100,7 +100,11 @@ Constants taken verbatim from the reference:
 - Cull once a sprite passes 800 px beyond any viewport edge.
 - Camera shake runs 8 updates at `±2 px` X, `±10 px` Y, `±0.5°`, decaying
   linearly.
-- Holding the pointer down spawns a new pair every 4 updates.
+- Holding the pointer down spawns a new pair every 2 updates. (The
+  reference's `DRAG_SPAWN_RATE = 4` counts raw ticker ticks at 60 Hz, which
+  is 2 updates at this project's fixed 30 Hz — see deviation 1 below. `2` is
+  correct for `DRAG_SPAWN_UPDATES` in `src/config.js`; do not "fix" it back
+  to 4, which would halve the stream.)
 
 Two deliberate deviations from the reference:
 
@@ -108,9 +112,14 @@ Two deliberate deviations from the reference:
    every second ticker tick, so it runs at double speed on a 120 Hz display.
    Updates here run at a fixed 30 per second regardless of refresh rate, which
    is what the reference looks like on a 60 Hz screen.
-2. **`MAX_ACTIVE` cap of 60 sprites.** A held drag streams a pair every 4
-   updates, and Canvas2D fill rate is the binding constraint at up to
-   512x1024 px per sprite. Past the cap the oldest sprite retires early.
+2. **`MAX_ACTIVE` cap of 60 sprites, as a safety ceiling rather than an
+   active fill-rate control.** A held drag's natural ceiling is 56 live
+   sprites (48 poms + 8 shockwaves, bounded by each sprite's own retirement
+   time against the 2-update spawn rate above), so in practice the cap never
+   engages. It exists as a hard backstop in case that natural ceiling is
+   ever wrong — Canvas2D fill rate is the real constraint at up to 512x1024
+   px per sprite. Past the cap, were it ever reached, the oldest sprite
+   retires early.
 
 The shockwave draws `source-over` rather than with the reference's `screen`
 blend. `screen` suppresses black fringing against the site's black background,

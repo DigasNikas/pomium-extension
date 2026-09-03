@@ -27,7 +27,15 @@ export const MOBILE_BREAKPOINT = 800;
 // Introduced here; see the plan's Global Constraints for why.
 export const UPDATES_PER_SECOND = 30;
 export const DRAG_SPAWN_UPDATES = 2;
+// A held drag naturally ceils at 56 live sprites (48 poms + 8 shockwaves);
+// MAX_ACTIVE is a safety ceiling above that, not an active fill-rate
+// control. See the plan's Global Constraints.
 export const MAX_ACTIVE = 60;
 export const IDLE_TEARDOWN_MS = 30000;
-export const ATLAS_CACHE_LIMIT = 4;
 export const ROSTER_SIZE = 3;
+// Must stay ROSTER_SIZE + 1: one atlas slot per live roster character plus
+// the shared shockwave atlas. main.js keeps exactly that many warm at all
+// times; raising ROSTER_SIZE without raising this would let the LRU cache
+// evict a still-on-screen sprite's atlas mid-flight. Derived rather than a
+// separate literal so the two can't drift — see test/config.test.js.
+export const ATLAS_CACHE_LIMIT = ROSTER_SIZE + 1;

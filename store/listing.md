@@ -140,10 +140,9 @@ extension collects, stores, and transmits nothing.
 
 ## Before you submit
 
-- [ ] Bump `manifest.json` version. `0.2.0` is a development number; a first
-      public submission usually wants `1.0.0`. Every upload must have a
+- [x] Bump `manifest.json` version — now `1.0.0`. Every upload must have a
       higher version than the one before it, and versions cannot be reused
-      even after a rejection.
+      even after a rejection, so bump again before any resubmission.
 - [ ] Run `./scripts/package.sh` and confirm `manifest.json` sits at the root
       of the zip, not inside a folder.
 - [ ] Load the zip's contents unpacked one final time and click a page — a
@@ -153,12 +152,13 @@ extension collects, stores, and transmits nothing.
       the last pass.
 - [ ] Tag the release. `.github/workflows/release.yml` does the rest: on a
       `v*` tag it runs the tests, builds the zip, checks its layout, and
-      attaches it to a **draft** GitHub release.
+      publishes a GitHub release with the zip attached.
 
       ```
       git tag v1.0.0 && git push origin v1.0.0
       ```
 
       The tag must match `manifest.json`'s version or the workflow fails on
-      purpose. Publish the draft when ready:
-      `gh release edit v1.0.0 --draft=false`
+      purpose. A hyphenated tag (`v1.0.0-rc1`) publishes as a prerelease
+      instead: still downloadable, but not marked latest and no release
+      notification — use that to check an artifact before it counts.

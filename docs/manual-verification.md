@@ -23,16 +23,17 @@ someone runs it.
 - [ ] The fixtures below are opened as `file://` URLs, which extensions
       cannot reach by default. On the Pomium card in `chrome://extensions`,
       click "Details" and turn on "Allow access to file URLs".
-- [ ] Know this failure signature before you start: `manifest.json`'s
-      `web_accessible_resources` carries `use_dynamic_url: true`. It is on
-      the critical path for both the bootstrap `import()` in
-      `src/content.js` and every atlas fetch in `src/atlas-loader.js`, both
-      of which depend on `chrome.runtime.getURL()` resolving correctly under
-      that flag — and it is untested here, since no unit test can see it. If
-      **nothing happens at all on any fixture** (no sprites ever appear on
-      click) and the page's DevTools console shows `[pomium] failed to
-      start`, remove `use_dynamic_url` from `manifest.json`, reload the
-      unpacked extension, and retry.
+- [ ] Historical note, in case it ever comes back: `web_accessible_resources`
+      used to carry `use_dynamic_url: true`, and that broke the extension
+      outright. `chrome.runtime.getURL()` returned a rotating GUID host
+      instead of the extension id, and the content script's own `import()`
+      could not fetch it, so `src/main.js` never loaded and no listener was
+      ever attached. The symptom is nothing happening anywhere, with nothing
+      in the *page* console — the error lands on the extension's own error
+      page (`chrome://extensions` → Pomium → Errors) as
+      `[pomium] failed to start TypeError: Failed to fetch dynamically
+      imported module`. The flag is gone now. If anyone re-adds it, this is
+      what it will look like.
 
 ## 1. Dark fixture — spawn line and heading
 
@@ -101,16 +102,12 @@ world.
       (no "Refused to load the image ... because it violates the following
       Content Security Policy directive" messages).
 
-If assets fail to load here specifically (but work on the other fixtures),
-there are two possible causes: either the loader has regressed to using an
-`<img>` element somewhere instead of `fetch` + `createImageBitmap`
-(`src/atlas-loader.js`), or `use_dynamic_url: true` in `manifest.json` is
-resolving URLs in a way this particular CSP blocks (see the `use_dynamic_url`
-failure signature in the Setup section above — though that one usually shows
-up as nothing working on *any* fixture, not just this one, so if the other
-three fixtures are fine, the loader regression is the more likely of the
-two). This is the one fixture that would actually catch either regression —
-the other pages have no CSP and would not.
+If assets fail to load here specifically but work on the other fixtures, the
+loader has regressed to using an `<img>` element somewhere instead of
+`fetch` + `createImageBitmap` (`src/atlas-loader.js`). An `<img>` pointed at
+an extension URL is subject to the page's `img-src`; a content-script
+`fetch` runs in the isolated world and is not. This is the one fixture that
+would catch that regression — the other pages have no CSP and would not.
 
 ## 4. Scroll fixture — canvas sizing and click-through
 

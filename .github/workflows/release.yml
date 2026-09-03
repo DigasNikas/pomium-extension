@@ -1,13 +1,17 @@
 name: Release
 
 # Tagging is the whole release process: push a v* tag and this builds the
-# Web Store zip, gates it on the test suite, and attaches it to a GitHub
-# release. Release assets live outside git history, so a 15MB zip per version
-# costs people cloning the repo nothing.
+# Web Store zip, gates it on the test suite, and publishes a GitHub release.
+# Release assets live outside git history, so a 15MB zip per version costs
+# people cloning the repo nothing.
 #
-# The release is created as a DRAFT — nothing is public until you publish it:
-#   gh release edit v1.0.0 --draft=false
-# To publish immediately instead, drop the --draft flag in the last step.
+#   git tag v1.0.0 && git push origin v1.0.0     -> published release
+#   git tag v1.1.0-rc1 && git push origin ...    -> prerelease
+#
+# A tag containing a hyphen is treated as a prerelease: it is published but
+# marked as such, is not shown as the repository's latest release, and does
+# not go out to watchers as a release notification. That is the staging path
+# if you want to check an artifact before it counts as the real thing.
 
 on:
   push:
@@ -66,15 +70,20 @@ jobs:
           done
           echo "layout ok: $(unzip -l "$ZIP" | tail -1)"
 
-      - name: Create draft release
+      - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
+          # A hyphen in the version marks a prerelease, per semver: v1.1.0-rc1
+          # publishes but stays off "latest" and out of release notifications.
+          PRERELEASE=""
+          case "$VERSION" in
+            *-*) PRERELEASE="--prerelease" ;;
+          esac
           gh release create "$GITHUB_REF_NAME" \
             "dist/pomium-${VERSION}.zip" \
             --title "Pomium ${VERSION}" \
             --generate-notes \
-            --draft
-          echo "Draft release ${GITHUB_REF_NAME} created."
-          echo "Publish with: gh release edit ${GITHUB_REF_NAME} --draft=false"
+            $PRERELEASE
+          echo "Released ${GITHUB_REF_NAME}${PRERELEASE:+ (prerelease)}"

@@ -3,3 +3,5 @@ node_modules/
 *.zip
 .claude/
 .superpowers/
+assets/desktop/
+assets/mobile/

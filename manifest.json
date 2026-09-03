@@ -1,15 +1,27 @@
 {
   "manifest_version": 3,
   "name": "Pomium",
-  "version": "0.1.0",
-  "description": "Bombs the page with a Pomeranian at every click.",
+  "version": "0.2.0",
+  "description": "Click any page and a pair of Pomeranians bombs across it.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["src/pom-bomb.js", "src/content.js"],
-      "css": ["src/pom-bomb.css"],
-      "run_at": "document_start",
-      "all_frames": true
+      "js": ["src/content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/*.js", "assets/manifest.json", "assets/desktop/*", "assets/mobile/*"],
+      "matches": ["<all_urls>"],
+      "use_dynamic_url": true
     }
   ]
 }

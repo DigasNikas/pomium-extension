@@ -1,0 +1,80 @@
+name: Release
+
+# Tagging is the whole release process: push a v* tag and this builds the
+# Web Store zip, gates it on the test suite, and attaches it to a GitHub
+# release. Release assets live outside git history, so a 15MB zip per version
+# costs people cloning the repo nothing.
+#
+# The release is created as a DRAFT — nothing is public until you publish it:
+#   gh release edit v1.0.0 --draft=false
+# To publish immediately instead, drop the --draft flag in the last step.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Needed to create the release and upload its asset. Nothing else is granted.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The Web Store keys off manifest.json's version and refuses to reuse
+      # one, so a tag that disagrees with the manifest produces a release
+      # whose artifact cannot be uploaded under that name. Fail here instead.
+      - name: Tag must match manifest version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          MANIFEST="$(node -p "require('./manifest.json').version")"
+          if [ "$TAG" != "$MANIFEST" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} implies version ${TAG}, but manifest.json says ${MANIFEST}"
+            exit 1
+          fi
+          echo "tag and manifest agree on ${MANIFEST}"
+
+      - name: Test
+        run: npm test
+
+      - name: Build extension zip
+        run: ./scripts/package.sh
+
+      # A zip whose manifest.json sits inside a folder is rejected by the Web
+      # Store, and the mistake is invisible until upload. Catch it in CI.
+      - name: Zip layout must have manifest.json at the root
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          ZIP="dist/pomium-${VERSION}.zip"
+          if ! unzip -l "$ZIP" | awk '{print $4}' | grep -qx 'manifest.json'; then
+            echo "::error::manifest.json is not at the root of ${ZIP}"
+            unzip -l "$ZIP" | head -20
+            exit 1
+          fi
+          for dev in test/ docs/ store/ scripts/ package.json; do
+            if unzip -l "$ZIP" | awk '{print $4}' | grep -q "^${dev}"; then
+              echo "::error::${dev} was packaged into ${ZIP} and should not be"
+              exit 1
+            fi
+          done
+          echo "layout ok: $(unzip -l "$ZIP" | tail -1)"
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" \
+            "dist/pomium-${VERSION}.zip" \
+            --title "Pomium ${VERSION}" \
+            --generate-notes \
+            --draft
+          echo "Draft release ${GITHUB_REF_NAME} created."
+          echo "Publish with: gh release edit ${GITHUB_REF_NAME} --draft=false"

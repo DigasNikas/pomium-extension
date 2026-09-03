@@ -151,5 +151,14 @@ extension collects, stores, and transmits nothing.
       in the diff.
 - [ ] Walk `docs/manual-verification.md` if anything in `src/` changed since
       the last pass.
-- [ ] Attach the zip to a GitHub Release so the uploaded artifact is
-      recoverable: `gh release create v1.0.0 dist/pomium-1.0.0.zip`
+- [ ] Tag the release. `.github/workflows/release.yml` does the rest: on a
+      `v*` tag it runs the tests, builds the zip, checks its layout, and
+      attaches it to a **draft** GitHub release.
+
+      ```
+      git tag v1.0.0 && git push origin v1.0.0
+      ```
+
+      The tag must match `manifest.json`'s version or the workflow fails on
+      purpose. Publish the draft when ready:
+      `gh release edit v1.0.0 --draft=false`

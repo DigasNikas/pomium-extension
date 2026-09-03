@@ -151,6 +151,12 @@ export function start() {
   }, { capture: true, passive: true });
   document.addEventListener('pointerup', (event) => {
     if (!event.isTrusted) return;
+    // Mirror pointerdown's primary-button filter. Chorded interactions fire a
+    // separate pointerup per button, so right-clicking mid-drag and releasing
+    // the right button first would otherwise stop a stream the user is still
+    // physically holding. pointercancel below stays unconditional: it reports
+    // button -1 and means the pointer is genuinely gone.
+    if (event.button !== undefined && event.button !== 0) return;
     endDrag();
   }, { capture: true, passive: true });
   document.addEventListener('pointercancel', (event) => {
@@ -167,7 +173,15 @@ export function start() {
   // nothing an isTrusted check would protect here; the failure mode of a
   // page firing one of these itself is just an early-ended drag, not
   // resource abuse.
-  document.addEventListener('pointerleave', endDrag, { capture: true, passive: true });
+  // pointerleave does not bubble, but non-bubbling events still traverse the
+  // capture phase — so a capture listener on `document` fires for the leave of
+  // EVERY element, not just the viewport. Dragging across any element boundary
+  // would end the stream within a few pixels of movement. Only a leave whose
+  // target is the root element means the pointer actually left the viewport.
+  document.addEventListener('pointerleave', (event) => {
+    if (event.target !== document.documentElement) return;
+    endDrag();
+  }, { capture: true, passive: true });
   window.addEventListener('blur', endDrag, { capture: true, passive: true });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) endDrag();

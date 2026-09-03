@@ -74,6 +74,16 @@ export function createOverlay(doc = document) {
     },
   };
 
-  overlay.resize();
+  // The host is already in the DOM at this point. If this first resize throws
+  // — getContext having returned null is the realistic case, which surfaces as
+  // a TypeError on ctx.setTransform — the caller's assignment never completes,
+  // so its own `if (overlay) overlay.destroy()` cleanup cannot run and the host
+  // would be orphaned in the page, once per failed attempt.
+  try {
+    overlay.resize();
+  } catch (error) {
+    host.remove();
+    throw error;
+  }
   return overlay;
 }

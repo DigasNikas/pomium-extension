@@ -56,12 +56,14 @@ tests are green; the browser-only behaviour they describe is unverified.
 ## Artwork
 
 The spritesheets are by [shapiro500](https://www.instagram.com/shapiro500/)
-and carry no posted licence. `scripts/fetch-assets.sh` pulls them from
-screen.toys for local use; they are gitignored deliberately. Publishing this
-extension requires replacing them with original or licensed frames, or
-obtaining permission. `assets/manifest.json` lists the character keys —
-swapping the art means replacing files and editing that list, with no code
-change.
+and carry no posted licence. They are committed to this repository so it
+clones and loads without a fetch step; `scripts/fetch-assets.sh` remains
+their provenance record and re-fetches them from screen.toys.
+
+Publishing this extension requires the author's permission, or replacing the
+art with original or licensed frames. `assets/manifest.json` lists the
+character keys and the fetch script derives from it, so swapping the art
+means replacing files and editing that list, with no code change.
 
 ## Known limitations
 

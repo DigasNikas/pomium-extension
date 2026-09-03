@@ -12,10 +12,11 @@ someone runs it.
 
 ## 0. Setup
 
-- [ ] From the repo root, run `./scripts/fetch-assets.sh`. It downloads the
-      spritesheets into `assets/desktop/` and `assets/mobile/` (gitignored,
-      not present until you run this). Expect a `done: 44 files` line and no
-      error.
+- [ ] Confirm the spritesheets are present: `assets/desktop/` and
+      `assets/mobile/` should hold 44 files between them. They are committed,
+      so a fresh clone already has them. If any are missing, run
+      `./scripts/fetch-assets.sh` from the repo root and expect a
+      `done: 44 files` line and no error.
 - [ ] Open `chrome://extensions`, enable "Developer mode" (top right), click
       "Load unpacked", and select the repo root (the folder containing
       `manifest.json`).

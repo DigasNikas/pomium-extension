@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Vendors the Poms spritesheets from screen.toys into assets/.
-# The binaries are gitignored: this script is their provenance record.
+# The binaries are committed, so this script is not needed for a normal
+# clone. It stays as their provenance record and to re-fetch or update them.
 #
 # The per-tier name list is read from assets/manifest.json (the art-swap
 # seam), not duplicated here, so swapping the character set means editing

@@ -24,6 +24,7 @@ export function parseAtlas(json) {
 export function createAtlasCache({ limit = ATLAS_CACHE_LIMIT, load }) {
   const entries = new Map();   // key -> atlas, insertion order is LRU order
   const pending = new Map();   // key -> promise
+  let cleared = false;
 
   function release(atlas) {
     if (atlas && atlas.image && typeof atlas.image.close === 'function') {
@@ -44,6 +45,14 @@ export function createAtlasCache({ limit = ATLAS_CACHE_LIMIT, load }) {
       const promise = load(key)
         .then((atlas) => {
           pending.delete(key);
+          // clear() (teardown mid-load) may have already run while this
+          // load was outstanding. Storing into a cleared cache would
+          // resurrect a bitmap nobody will ever release; close it instead
+          // of caching it.
+          if (cleared) {
+            release(atlas);
+            return atlas;
+          }
           entries.set(key, atlas);
           while (entries.size > limit) {
             const oldest = entries.keys().next().value;
@@ -65,6 +74,7 @@ export function createAtlasCache({ limit = ATLAS_CACHE_LIMIT, load }) {
     },
 
     clear() {
+      cleared = true;
       for (const atlas of entries.values()) release(atlas);
       entries.clear();
       pending.clear();

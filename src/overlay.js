@@ -13,7 +13,11 @@ export function createOverlay(doc = document) {
   const host = doc.createElement('div');
   // Set with !important: a page's own author-stylesheet !important rule beats
   // a plain inline declaration, so a hostile page could otherwise override
-  // position/pointer-events/z-index and break the overlay.
+  // position/pointer-events/z-index and break the overlay. display/
+  // visibility/opacity are included because the host also carries
+  // aria-hidden="true", and a page shipping a rule like
+  // `[aria-hidden="true"] { display: none }` would otherwise hide the
+  // overlay entirely and defeat the rest of this hardening.
   for (const [prop, value] of Object.entries({
     position: 'fixed',
     inset: '0',
@@ -24,6 +28,9 @@ export function createOverlay(doc = document) {
     border: '0',
     'pointer-events': 'none',
     'z-index': '2147483647',
+    display: 'block',
+    visibility: 'visible',
+    opacity: '1',
   })) {
     host.style.setProperty(prop, value, 'important');
   }

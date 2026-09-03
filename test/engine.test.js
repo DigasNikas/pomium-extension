@@ -132,6 +132,28 @@ test('the engine reports idle only when nothing is on screen', () => {
   assert.equal(e.isIdle, false);
 });
 
+test('composed with the engine, MAX_ACTIVE eviction still drops the oldest sprite, not the shockwave', () => {
+  // Regression for finding 4: engine.update() sorts list.items by zIndex
+  // every tick, and a shockwave's zIndex (scale - 10) always sorts it to the
+  // front. SpriteList.add() used to evict from array position 0, so once the
+  // list had been sorted at least once, the cap evicted shockwaves instead
+  // of the oldest sprite. test/sprites.test.js can't see this: in isolation,
+  // insertion order and array order coincide because nothing ever sorts the
+  // list. frameCountFor is overridden to a large value so nothing retires
+  // via advanceFrame() within this test's 31 updates, isolating the eviction
+  // behaviour from the frame-retirement path.
+  const e = engine({ frameCountFor: () => 1000 });
+  for (let i = 0; i < 31; i++) {
+    e.spawnPair(0.5);
+    e.update();
+  }
+  assert.equal(e.sprites.length, 60, 'MAX_ACTIVE cap holds at 60');
+  const shockwaves = e.sprites.filter((s) => s.isShockwave);
+  const poms = e.sprites.filter((s) => !s.isShockwave);
+  assert.equal(shockwaves.length, 30, 'shockwaves must not be evicted preferentially');
+  assert.equal(poms.length, 30, 'poms must not be evicted preferentially');
+});
+
 test('resize changes the spawn line and the depth basis', () => {
   const e = engine();
   e.resize(2000, 1200);

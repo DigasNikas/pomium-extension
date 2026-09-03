@@ -1,0 +1,116 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Pomium fixture — scroll</title>
+<style>
+  html, body { margin: 0; background: #0a0a0a; color: #ddd; font: 16px/1.5 system-ui, sans-serif; }
+  body { min-height: 4000px; }
+
+  /* Hard against the true right edge of the viewport, fixed so it stays
+     visible while scrolling. If the overlay canvas is sized narrower than
+     the viewport (e.g. a stale clientWidth/innerWidth reading under a
+     scrollbar), the poms will visibly stop short of this line instead of
+     reaching it, and the canvas's own right edge will show a soft or
+     blurred band just to the left of it. */
+  .edge-marker {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    border-right: 8px solid #ff2d55;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .marker-label {
+    position: fixed;
+    top: 8px;
+    right: 16px;
+    color: #ff2d55;
+    font-weight: bold;
+    z-index: 1;
+  }
+
+  section {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .field-block {
+    display: grid;
+    gap: 12px;
+    margin: 24px 0;
+  }
+
+  input, textarea {
+    font: inherit;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  textarea { height: 100px; }
+
+  .spacer {
+    height: 900px;
+    border-top: 1px dashed #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+  }
+
+  a { color: #6cf; }
+
+  #bottom-marker {
+    padding: 48px 24px;
+    text-align: center;
+    font-size: 24px;
+    color: #6f6;
+  }
+</style>
+<body>
+  <div class="edge-marker"></div>
+  <div class="marker-label">right edge marker &#8594;</div>
+
+  <section>
+    <h1>Pomium fixture — scroll</h1>
+    <p>
+      This page is tall enough to scroll, and carries a red line fixed hard
+      against the true right edge of the viewport. It also has a link and
+      form fields for testing click-through. See
+      <code>docs/manual-verification.md</code>, section 4, for the checklist
+      this fixture supports.
+    </p>
+    <p>
+      <a href="#bottom-marker">Jump to the bottom marker</a> — clicking this
+      should navigate normally, in addition to spawning a pair of
+      Pomeranians at the click point.
+    </p>
+
+    <div class="field-block">
+      <label>
+        Text input (click in, then type — it should focus and accept text)
+        <input type="text" placeholder="type here">
+      </label>
+      <label>
+        Textarea (same check)
+        <textarea placeholder="type here too"></textarea>
+      </label>
+    </div>
+
+    <p>
+      Click near the red line on the right edge at any scroll position.
+      The overlay canvas should fill the viewport exactly: no gap between
+      where the poms travel and the red line, and no soft or blurred band
+      along the canvas's own right edge.
+    </p>
+  </section>
+
+  <div class="spacer">scroll down</div>
+  <div class="spacer">keep scrolling</div>
+  <div class="spacer">almost there</div>
+
+  <div id="bottom-marker">You made it — the link works.</div>
+</body>

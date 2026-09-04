@@ -89,6 +89,19 @@ underneath continues to receive every event normally.
 No host permissions beyond the content script match are requested. There is
 no background service worker, no network access after install, and no
 storage permission.
+
+On activeTab specifically: it grants access only after an explicit gesture
+on the extension itself — clicking its toolbar icon, a context menu entry,
+or a keyboard shortcut. A click on the page is not such a gesture. Adopting
+activeTab would therefore require the user to click a toolbar button to arm
+each tab before the extension could respond to any click on that page,
+which removes the one interaction the extension exists to provide. The
+broad match is not a convenience here; it is what makes a click-anywhere
+decorative effect possible at all.
+
+Narrowing to specific sites is not applicable either. There is no set of
+sites this belongs on: the user decides, per click, which page they want to
+decorate, and that is the entire product.
 ```
 
 Note: the manifest requests **no** `permissions` array at all — only

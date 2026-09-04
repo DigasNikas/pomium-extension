@@ -31,7 +31,7 @@ a continuous stream.
 | `src/config.js` | Every tuning constant |
 | `scripts/fetch-assets.sh` | Vendors the spritesheets from screen.toys into `assets/` |
 | `icons/` | Toolbar icons, cropped from the bundled artwork |
-| `assets/manifest.json` | Character keys and tiers; the art-swap seam |
+| `assets/atlases.json` | Character keys and tiers; the art-swap seam |
 
 ## Tests
 

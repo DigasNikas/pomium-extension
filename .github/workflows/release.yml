@@ -68,6 +68,17 @@ jobs:
               exit 1
             fi
           done
+          # The Web Store treats ANY file named manifest.json anywhere in the
+          # package as an extension manifest and rejects the upload if there
+          # is more than one. This shipped once: assets/ carried its own
+          # manifest.json listing the character tiers, which is why that file
+          # is now assets/atlases.json.
+          MANIFESTS="$(unzip -l "$ZIP" | awk '{print $4}' | grep -Ec '(^|/)manifest\.json$' || true)"
+          if [ "$MANIFESTS" != "1" ]; then
+            echo "::error::${ZIP} contains ${MANIFESTS} files named manifest.json; the Web Store allows exactly one"
+            unzip -l "$ZIP" | awk '{print $4}' | grep -E '(^|/)manifest\.json$'
+            exit 1
+          fi
           echo "layout ok: $(unzip -l "$ZIP" | tail -1)"
 
       - name: Publish release

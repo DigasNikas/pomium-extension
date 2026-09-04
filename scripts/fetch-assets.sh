@@ -3,7 +3,7 @@
 # The binaries are committed, so this script is not needed for a normal
 # clone. It stays as their provenance record and to re-fetch or update them.
 #
-# The per-tier name list is read from assets/manifest.json (the art-swap
+# The per-tier name list is read from assets/atlases.json (the art-swap
 # seam), not duplicated here, so swapping the character set means editing
 # the manifest and re-running this script — no code change.
 set -euo pipefail
@@ -22,7 +22,7 @@ for tier in desktop mobile; do
     const root = process.argv[1];
     const tier = process.argv[2];
     const manifest = JSON.parse(
-      fs.readFileSync(path.join(root, "assets/manifest.json"), "utf8")
+      fs.readFileSync(path.join(root, "assets/atlases.json"), "utf8")
     );
     const t = manifest.tiers[tier];
     process.stdout.write([...t.characters, t.shockwave].join("\n"));

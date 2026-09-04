@@ -18,7 +18,7 @@ Build the upload zip with `./scripts/package.sh`.
 Pomium
 ```
 
-**Short description** (132 characters max — this one is 96)
+**Short description** (132 characters max — this one is 101)
 
 ```
 Click any page and a pair of Pomeranians bombs across it, trailing fire. A browser toy, nothing else.
@@ -74,34 +74,15 @@ clicks on it.
 
 **Host permission — content script matches `<all_urls>`**
 
+The dashboard caps this field at **1000 characters**. The text below is
+922, so there is a little room but not much — keep any edit tight.
+
 ```
-The extension's only function is to draw a decorative animation over
-whichever page the user is currently looking at, triggered by their click.
-There is no way to know in advance which pages a user will want to click on,
-so the content script has to be able to run wherever they choose.
+Pomium draws a decorative animation over whatever page the user clicks. Which pages those are is the user's choice at click time, so the content script has to be able to run anywhere.
 
-The content script does not read page content. It attaches passive pointer
-listeners, reads only the x coordinate of the click to decide where the
-animation enters the screen, and draws into its own canvas inside a closed
-shadow root. It never calls preventDefault or stopPropagation, so the page
-underneath continues to receive every event normally.
+It reads no page content: passive pointer listeners, the click's x coordinate only, drawn into its own canvas inside a closed shadow root. It never calls preventDefault or stopPropagation, so the page still receives every event. No network requests after install, no storage, no background service worker, and no permissions array at all.
 
-No host permissions beyond the content script match are requested. There is
-no background service worker, no network access after install, and no
-storage permission.
-
-On activeTab specifically: it grants access only after an explicit gesture
-on the extension itself — clicking its toolbar icon, a context menu entry,
-or a keyboard shortcut. A click on the page is not such a gesture. Adopting
-activeTab would therefore require the user to click a toolbar button to arm
-each tab before the extension could respond to any click on that page,
-which removes the one interaction the extension exists to provide. The
-broad match is not a convenience here; it is what makes a click-anywhere
-decorative effect possible at all.
-
-Narrowing to specific sites is not applicable either. There is no set of
-sites this belongs on: the user decides, per click, which page they want to
-decorate, and that is the entire product.
+activeTab does not fit: it requires a gesture on the extension itself (toolbar icon, context menu, keyboard shortcut). A click on the page is not one, so users would have to arm every tab from the toolbar before clicking it — removing the only interaction the extension provides. Named hosts do not apply either: there is no set of sites this belongs to, because the user picks the page per click.
 ```
 
 Note: the manifest requests **no** `permissions` array at all — only

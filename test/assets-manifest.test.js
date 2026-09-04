@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { CHARACTER_COUNT } from '../src/config.js';
 
 const manifest = JSON.parse(
-  readFileSync(new URL('../assets/manifest.json', import.meta.url))
+  readFileSync(new URL('../assets/atlases.json', import.meta.url))
 );
 
 test('the manifest describes both tiers', () => {
